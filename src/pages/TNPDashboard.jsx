@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
+import toast from 'react-hot-toast';
 import { getPendingJobDrives, approveJobDrive, rejectJobDrive, getAdminStatistics, getRecentActivity } from '../services/tnpService';
 import { 
   Users, Building2, Briefcase, FileText, Edit2, AlertCircle,
@@ -45,15 +46,15 @@ const TNPDashboard = () => {
     if (result.success) {
       setPendingJobs((prev) => prev.filter((j) => j.id !== jobId));
       const emailCount = result.emailsSent || 0;
-      alert(`✅ Job drive approved!\n📧 Notification emails sent to ${emailCount} eligible students`);
+      toast.success(`✅ Job drive approved! 📧 Notification emails sent to ${emailCount} eligible students`);
     } else {
-      alert('Error approving job: ' + (result.error || 'Unknown error'));
+      toast.error('Error approving job: ' + (result.error || 'Unknown error'));
     }
   };
 
   const handleReject = async (jobId) => {
     if (!rejectionReason.trim()) {
-      alert('Please provide a rejection reason');
+      toast.error('Please provide a rejection reason');
       return;
     }
 
@@ -62,13 +63,13 @@ const TNPDashboard = () => {
       setPendingJobs((prev) => prev.filter((j) => j.id !== jobId));
       setSelectedJobForRejection(null);
       setRejectionReason('');
-      alert('Job drive rejected!');
+      toast.success('Job drive rejected!');
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-slate-50">
         <Navbar />
         <div className="flex flex-col items-center justify-center h-96">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
@@ -79,7 +80,7 @@ const TNPDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-slate-50 pb-16">
       <Navbar />
 
       {/* Blur Backdrop for Rejection Modal */}
@@ -89,15 +90,15 @@ const TNPDashboard = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header Card */}
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-8 shadow-lg overflow-hidden relative">
+        <div className="bg-linear-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-8 shadow-lg overflow-hidden relative">
           <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 rounded-full -mr-20 -mt-20"></div>
           <div className="relative z-10">
             <div className="flex items-center gap-4 mb-4">
-              <div className="h-14 w-14 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                <AlertCircle className="h-7 w-7 text-blue-300" />
+              <div className="h-11 w-11 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-blue-300" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold tracking-tight">TNP Dashboard</h1>
+                <h1 className="text-3xl font-bold tracking-tight">TNP Dashboard</h1>
                 <p className="text-slate-300 mt-1 font-medium">Manage campus placement drives and student applications</p>
               </div>
             </div>
@@ -107,48 +108,48 @@ const TNPDashboard = () => {
         {/* Statistics Grid */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-md p-6 hover:shadow-xl transition-all hover:border-slate-200 hover:scale-105 transform">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-md p-5 hover:shadow-xl transition-all hover:border-slate-200 hover:scale-105 transform">
               <div className="flex items-start justify-between mb-4">
-                <div className="h-12 w-12 bg-blue-50 rounded-xl flex items-center justify-center">
-                  <Users className="h-6 w-6 text-blue-600" />
+                <div className="h-10 w-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <Users className="h-5 w-5 text-blue-600" />
                 </div>
                 <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">👥</span>
               </div>
               <p className="text-slate-600 text-sm font-semibold">Total Students</p>
-              <p className="text-4xl font-bold text-slate-900 mt-2">{stats.users?.student || 0}</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{stats.users?.student || 0}</p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-md p-6 hover:shadow-xl transition-all hover:border-slate-200 hover:scale-105 transform">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-md p-5 hover:shadow-xl transition-all hover:border-slate-200 hover:scale-105 transform">
               <div className="flex items-start justify-between mb-4">
-                <div className="h-12 w-12 bg-emerald-50 rounded-xl flex items-center justify-center">
-                  <Building2 className="h-6 w-6 text-emerald-600" />
+                <div className="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                  <Building2 className="h-5 w-5 text-emerald-600" />
                 </div>
                 <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">🏢</span>
               </div>
               <p className="text-slate-600 text-sm font-semibold">Total Companies</p>
-              <p className="text-4xl font-bold text-slate-900 mt-2">{stats.users?.company || 0}</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{stats.users?.company || 0}</p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-md p-6 hover:shadow-xl transition-all hover:border-slate-200 hover:scale-105 transform">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-md p-5 hover:shadow-xl transition-all hover:border-slate-200 hover:scale-105 transform">
               <div className="flex items-start justify-between mb-4">
-                <div className="h-12 w-12 bg-amber-50 rounded-xl flex items-center justify-center">
-                  <Briefcase className="h-6 w-6 text-amber-600" />
+                <div className="h-10 w-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                  <Briefcase className="h-5 w-5 text-amber-600" />
                 </div>
                 <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full">📋</span>
               </div>
               <p className="text-slate-600 text-sm font-semibold">Approved Drives</p>
-              <p className="text-4xl font-bold text-slate-900 mt-2">{stats.jobs?.approved || 0}</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{stats.jobs?.approved || 0}</p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-md p-6 hover:shadow-xl transition-all hover:border-slate-200 hover:scale-105 transform">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-md p-5 hover:shadow-xl transition-all hover:border-slate-200 hover:scale-105 transform">
               <div className="flex items-start justify-between mb-4">
-                <div className="h-12 w-12 bg-rose-50 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-rose-600" />
+                <div className="h-10 w-10 bg-rose-50 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-rose-600" />
                 </div>
                 <span className="text-xs font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full">📊</span>
               </div>
               <p className="text-slate-600 text-sm font-semibold">Total Applications</p>
-              <p className="text-4xl font-bold text-slate-900 mt-2">
+              <p className="text-3xl font-bold text-slate-900 mt-2">
                 {Object.values(stats.applications || {}).reduce((sum, count) => sum + count, 0)}
               </p>
             </div>
@@ -158,8 +159,8 @@ const TNPDashboard = () => {
         {/* Pending Approvals Section */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <Clock className="h-6 w-6 text-amber-500" />
+            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <Clock className="h-5 w-5 text-amber-500" />
               Pending Approvals
             </h2>
             <span className="text-sm bg-amber-50 text-amber-700 px-3.5 py-1 rounded-full font-semibold">
@@ -168,11 +169,11 @@ const TNPDashboard = () => {
           </div>
 
           {pendingJobs.length === 0 ? (
-            <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl border border-slate-100 border-dashed p-16 text-center flex flex-col items-center">
-              <div className="h-16 w-16 bg-green-50 rounded-full flex items-center justify-center mb-4">
-                <CheckCircle2 className="h-8 w-8 text-green-600" />
+            <div className="bg-linear-to-br from-white to-slate-50 rounded-2xl border border-slate-100 border-dashed p-12 text-center flex flex-col items-center">
+              <div className="h-14 w-14 bg-green-50 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle2 className="h-7 w-7 text-green-600" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900">All Caught Up!</h3>
+              <h3 className="text-base font-bold text-slate-900">All Caught Up!</h3>
               <p className="text-slate-500 font-medium mt-2 max-w-sm mx-auto">
                 There are no pending job drives to review. All submissions have been processed.
               </p>
@@ -183,10 +184,10 @@ const TNPDashboard = () => {
                 <div key={job.id} className="bg-white rounded-2xl border border-slate-100 shadow-md overflow-hidden hover:shadow-lg transition-all hover:border-slate-200">
                   
                   {/* Job Header */}
-                  <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-white to-slate-50">
+                  <div className="p-5 border-b border-slate-100 bg-linear-to-r from-white to-slate-50">
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-slate-900 mb-2">{job.title}</h3>
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">{job.title}</h3>
                         <p className="text-slate-600 font-semibold flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-blue-500" />
                           {job.companies?.company_name}
@@ -200,7 +201,7 @@ const TNPDashboard = () => {
                   </div>
 
                   {/* Job Details Grid */}
-                  <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 bg-gradient-to-br from-slate-50 to-blue-50">
+                  <div className="p-5 grid grid-cols-2 md:grid-cols-4 gap-4 bg-linear-to-br from-slate-50 to-blue-50">
                     <div className="hover:bg-white p-3 rounded-lg transition">
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Package</p>
                       <p className="text-lg font-bold text-emerald-600 mt-1 flex items-center gap-1.5">
@@ -242,8 +243,8 @@ const TNPDashboard = () => {
                   {selectedJobForRejection === job.id && (
                     <div className="fixed inset-0 flex items-center justify-center z-50 px-4 pointer-events-none">
                       <div className="w-full max-w-xl bg-white rounded-2xl border border-slate-100 shadow-2xl p-8 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 pointer-events-auto">
-                        <h3 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                          <AlertCircle className="h-6 w-6 text-rose-600" />
+                        <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                          <AlertCircle className="h-5 w-5 text-rose-600" />
                           Rejection Reason
                         </h3>
                         <p className="text-slate-600 font-medium mb-4">Please provide a detailed reason for rejecting this job drive.</p>
@@ -251,7 +252,7 @@ const TNPDashboard = () => {
                           placeholder="e.g. Salary package is below institutional guidelines. Please resubmit with adjusted compensation..."
                           value={rejectionReason}
                           onChange={(e) => setRejectionReason(e.target.value)}
-                          className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg bg-gradient-to-r from-white to-blue-50 text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-300 focus:ring-offset-1 transition-all shadow-sm min-h-[120px] resize-none"
+                          className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg bg-linear-to-r from-white to-blue-50 text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-300 focus:ring-offset-1 transition-all shadow-sm min-h-[120px] resize-none"
                           rows="5"
                         />
                         <div className="mt-6 flex items-center gap-3 pt-6 border-t border-slate-200 justify-end">
@@ -266,7 +267,7 @@ const TNPDashboard = () => {
                           </button>
                           <button
                             onClick={() => handleReject(job.id)}
-                            className="px-6 py-2.5 bg-gradient-to-r from-rose-600 to-rose-700 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-rose-700 hover:to-rose-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-1"
+                            className="px-6 py-2.5 bg-linear-to-r from-rose-600 to-rose-700 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-rose-700 hover:to-rose-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-1"
                           >
                             Confirm Rejection
                           </button>
@@ -276,17 +277,17 @@ const TNPDashboard = () => {
                   )}
 
                   {/* Action Buttons */}
-                  <div className="p-6 bg-white flex gap-3">
+                  <div className="p-5 bg-white flex gap-3">
                     <button
                       onClick={() => handleApprove(job.id)}
-                      className="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-1 gap-2"
+                      className="flex-1 inline-flex items-center justify-center px-6 py-3 bg-linear-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-1 gap-2"
                     >
                       <CheckCircle2 className="h-5 w-5" />
                       Approve
                     </button>
                     <button
                       onClick={() => setSelectedJobForRejection(job.id)}
-                      className="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-rose-600 to-rose-700 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-rose-700 hover:to-rose-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-1 gap-2"
+                      className="flex-1 inline-flex items-center justify-center px-6 py-3 bg-linear-to-r from-rose-600 to-rose-700 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-rose-700 hover:to-rose-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-1 gap-2"
                     >
                       <XCircle className="h-5 w-5" />
                       Reject

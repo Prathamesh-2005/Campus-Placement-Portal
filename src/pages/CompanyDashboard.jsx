@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import useAuth from '../hooks/useAuth';
 import { getCompanyJobDrives, createJobDrive, getJobApplicants, updateApplicationStatus } from '../services/jobService';
 import { getCompanyProfile } from '../services/authService';
+import toast from 'react-hot-toast';
 import { 
   Building2, MapPin, IndianRupee, GraduationCap, 
   CalendarDays, Users, Plus, Briefcase, 
@@ -50,11 +51,11 @@ const CompanyDashboard = () => {
   const handleCreateJob = async (e) => {
     e.preventDefault();
     if (!companyProfile || !companyProfile.id) {
-      alert('Company profile not loaded. Please refresh the page.');
+      toast.error('Company profile not loaded. Please refresh the page.');
       return;
     }
     if (!formData.title || !formData.package || !formData.eligibility || !formData.deadline) {
-      alert('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -72,10 +73,9 @@ const CompanyDashboard = () => {
       
       setFormData({ title: '', description: '', package: '', location: '', eligibility: '', deadline: '' });
       setShowCreateForm(false);
-      // NOTE: Consider replacing this alert with a toast library like sonner or react-hot-toast
-      alert('Job drive created! Waiting for TNP approval.');
+      toast.success('✅ Job drive created! Waiting for TNP approval.');
     } else {
-      alert('Error: ' + (result.error || 'Failed to create job drive'));
+      toast.error('Error: ' + (result.error || 'Failed to create job drive'));
     }
     setLoading(false);
   };
@@ -95,7 +95,7 @@ const CompanyDashboard = () => {
         prev.map((app) => (app.id === applicationId ? { ...app, status } : app))
       );
     } else {
-      alert('Error updating status: ' + (result.error || 'Unknown error'));
+      toast.error('Error updating status: ' + (result.error || 'Unknown error'));
     }
   };
 
@@ -125,7 +125,7 @@ const CompanyDashboard = () => {
     }
     setSelectedApplicants(new Set());
     setBulkStatus('');
-    alert(`Updated ${selectedApplicants.size} applicants to ${bulkStatus}`);
+    toast.success(`✅ Updated ${selectedApplicants.size} applicants to ${bulkStatus}`);
   };
 
   const getStatusBadge = (status) => {
@@ -155,17 +155,14 @@ const CompanyDashboard = () => {
       <div className="min-h-screen bg-slate-50 flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-pulse flex flex-col items-center space-y-4">
-            <div className="h-8 w-8 rounded-full border-2 border-slate-900 border-t-transparent animate-spin"></div>
-            <p className="text-slate-500 text-sm font-medium">Loading workspace...</p>
-          </div>
+          <div className="h-8 w-8 rounded-full border-2 border-slate-900 border-t-transparent animate-spin"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 pb-16">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-slate-50 pb-16">
       <Navbar />
 
       {/* Blur Backdrop - Full Screen */}
@@ -199,7 +196,7 @@ const CompanyDashboard = () => {
                       placeholder="e.g. Senior Software Engineer"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="flex h-11 w-full rounded-lg border-2 border-slate-200 bg-gradient-to-r from-white to-blue-50 px-4 py-2.5 pl-11 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md"
+                      className="flex h-11 w-full rounded-lg border-2 border-slate-200 bg-linear-to-r from-white to-blue-50 px-4 py-2.5 pl-11 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md"
                       required
                     />
                   </div>
@@ -215,7 +212,7 @@ const CompanyDashboard = () => {
                       placeholder="e.g. Pune, Bangalore, Remote"
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      className="flex h-11 w-full rounded-lg border-2 border-slate-200 bg-gradient-to-r from-white to-blue-50 px-4 py-2.5 pl-11 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md"
+                      className="flex h-11 w-full rounded-lg border-2 border-slate-200 bg-linear-to-r from-white to-blue-50 px-4 py-2.5 pl-11 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md"
                       required
                     />
                   </div>
@@ -232,7 +229,7 @@ const CompanyDashboard = () => {
                       step="0.1"
                       value={formData.package}
                       onChange={(e) => setFormData({ ...formData, package: e.target.value })}
-                      className="flex h-11 w-full rounded-lg border-2 border-slate-200 bg-gradient-to-r from-white to-blue-50 px-4 py-2.5 pl-11 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md"
+                      className="flex h-11 w-full rounded-lg border-2 border-slate-200 bg-linear-to-r from-white to-blue-50 px-4 py-2.5 pl-11 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md"
                       required
                     />
                   </div>
@@ -249,7 +246,7 @@ const CompanyDashboard = () => {
                       step="0.1"
                       value={formData.eligibility}
                       onChange={(e) => setFormData({ ...formData, eligibility: e.target.value })}
-                      className="flex h-11 w-full rounded-lg border-2 border-slate-200 bg-gradient-to-r from-white to-blue-50 px-4 py-2.5 pl-11 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md"
+                      className="flex h-11 w-full rounded-lg border-2 border-slate-200 bg-linear-to-r from-white to-blue-50 px-4 py-2.5 pl-11 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md"
                       required
                     />
                   </div>
@@ -263,7 +260,7 @@ const CompanyDashboard = () => {
                   placeholder="Describe the role, responsibilities, and requirements..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="flex min-h-[120px] w-full rounded-lg border-2 border-slate-200 bg-gradient-to-r from-white to-blue-50 px-4 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md resize-none"
+                  className="flex min-h-[120px] w-full rounded-lg border-2 border-slate-200 bg-linear-to-r from-white to-blue-50 px-4 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md resize-none"
                 />
               </div>
 
@@ -276,7 +273,7 @@ const CompanyDashboard = () => {
                     type="date"
                     value={formData.deadline}
                     onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                    className="flex h-11 w-full rounded-lg border-2 border-slate-200 bg-gradient-to-r from-white to-blue-50 px-4 py-2.5 pl-11 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md"
+                    className="flex h-11 w-full rounded-lg border-2 border-slate-200 bg-linear-to-r from-white to-blue-50 px-4 py-2.5 pl-11 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:ring-offset-1 transition-all shadow-sm hover:border-blue-300 hover:shadow-md"
                     required
                   />
                 </div>
@@ -293,7 +290,7 @@ const CompanyDashboard = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-8 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1"
+                  className="px-8 py-2.5 bg-linear-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1"
                 >
                   Publish Drive
                 </button>
@@ -307,20 +304,20 @@ const CompanyDashboard = () => {
         
         {/* Profile Header Card */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-          <div className="h-24 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+          <div className="h-24 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10 bg-grid-pattern"></div>
           </div>
           <div className="px-6 pb-6">
             <div className="relative flex justify-between items-end -mt-8 mb-4">
               <div className="bg-white p-2 rounded-2xl border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="h-16 w-16 bg-gradient-to-br from-blue-50 to-slate-100 rounded-xl flex items-center justify-center">
+                <div className="h-16 w-16 bg-linear-to-br from-blue-50 to-slate-100 rounded-xl flex items-center justify-center">
                   <Building2 className="w-8 h-8 text-slate-600" />
                 </div>
               </div>
               {!showCreateForm && (
                 <button
                   onClick={() => setShowCreateForm(true)}
-                  className="inline-flex items-center px-5 py-2 bg-gradient-to-r from-slate-900 to-slate-800 text-white text-xs font-semibold rounded-lg hover:shadow-lg hover:from-slate-800 hover:to-slate-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+                  className="inline-flex items-center px-5 py-2 bg-linear-to-r from-slate-900 to-slate-800 text-white text-xs font-semibold rounded-lg hover:shadow-lg hover:from-slate-800 hover:to-slate-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
                 >
                   <Plus className="w-4 h-4 mr-1.5" />
                   Create Drive
@@ -376,7 +373,7 @@ const CompanyDashboard = () => {
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg border border-slate-100 shadow-xs">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-linear-to-br from-slate-50 to-blue-50 rounded-lg border border-slate-100 shadow-xs">
                       <div className="hover:bg-white p-2 rounded-lg transition duration-200">
                         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Min CGPA</p>
                         <p className="text-lg font-bold text-emerald-600 flex items-center gap-1">
@@ -394,7 +391,7 @@ const CompanyDashboard = () => {
                       <div className="md:col-span-2 flex items-end justify-end">
                         <button
                           onClick={() => selectedJobApplicants === job.id ? setSelectedJobApplicants(null) : handleViewApplicants(job.id)}
-                          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-slate-900 to-slate-800 text-white text-xs font-semibold rounded-lg hover:shadow-md hover:from-slate-800 hover:to-slate-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+                          className="inline-flex items-center px-4 py-2 bg-linear-to-r from-slate-900 to-slate-800 text-white text-xs font-semibold rounded-lg hover:shadow-md hover:from-slate-800 hover:to-slate-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
                         >
                           <Users className="w-3.5 h-3.5 mr-1" />
                           {selectedJobApplicants === job.id ? 'Hide Applicants' : `View Applicants (${applicants.length})`}
@@ -470,7 +467,7 @@ const CompanyDashboard = () => {
                                   className="w-4 h-4 rounded border-2 border-slate-300 text-blue-600 cursor-pointer flex-shrink-0"
                                 />
                                 {/* Avatar */}
-                                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-slate-600 flex items-center justify-center text-white font-bold text-xs shadow-md flex-shrink-0">
+                                <div className="h-9 w-9 rounded-full bg-linear-to-br from-blue-500 to-slate-600 flex items-center justify-center text-white font-bold text-xs shadow-md flex-shrink-0">
                                   {app.students.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -502,7 +499,7 @@ const CompanyDashboard = () => {
                                 <select
                                   value={app.status}
                                   onChange={(e) => handleUpdateApplicationStatus(app.id, e.target.value)}
-                                  className="appearance-none bg-gradient-to-r from-white to-blue-50 border border-slate-200 text-slate-900 text-xs rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer font-semibold hover:border-blue-300 transition-all shadow-sm"
+                                  className="appearance-none bg-linear-to-r from-white to-blue-50 border border-slate-200 text-slate-900 text-xs rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer font-semibold hover:border-blue-300 transition-all shadow-sm"
                                 >
                                   <option value="applied">Applied</option>
                                   <option value="shortlisted">Shortlisted</option>
