@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase } from '../config/supabase';
 
 /**
  * Send email via Supabase Edge Function (Gmail SMTP)

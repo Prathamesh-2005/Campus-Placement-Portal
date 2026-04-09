@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../services/supabaseClient';
+import { supabase } from '../config/supabase';
 
 // Hook for real-time job drive updates
 export const useRealtimeJobs = () => {

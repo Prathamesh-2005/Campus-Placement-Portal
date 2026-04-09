@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase } from '../config/supabase';
 import { notifyJobApproved } from './emailService';
 
 // GET ALL PENDING JOB DRIVES (TNP only)
@@ -101,47 +101,53 @@ export const getAllJobDrives = async () => {
 export const getAdminStatistics = async () => {
   try {
     // Total users by role
-    const { data: roleStats } = await supabase
+    const { data: allUsers, error: userError } = await supabase
       .from('users')
-      .select('role')
-      .then((res) => ({
-        data: res.data?.reduce((acc, u) => {
-          acc[u.role] = (acc[u.role] || 0) + 1;
-          return acc;
-        }, {}),
-      }));
+      .select('role');
+
+    const roleStats = allUsers?.reduce((acc, u) => {
+      acc[u.role] = (acc[u.role] || 0) + 1;
+      return acc;
+    }, {}) || {};
 
     // Job drive stats
-    const { data: jobStats } = await supabase
+    const { data: jobStats, error: jobError } = await supabase
       .from('job_drives')
       .select('status');
 
-    // Application stats
-    const { data: appStats } = await supabase
+    const jobCounts = jobStats?.reduce(
+      (acc, j) => {
+        acc[j.status] = (acc[j.status] || 0) + 1;
+        return acc;
+      },
+      {}
+    ) || {};
+
+    // Application stats - NOW CORRECTLY COUNTING
+    const { data: appStats, error: appError } = await supabase
       .from('applications')
       .select('status');
+
+    console.log('Application Stats:', appStats);
+
+    const applicationCounts = appStats?.reduce(
+      (acc, a) => {
+        acc[a.status] = (acc[a.status] || 0) + 1;
+        return acc;
+      },
+      {}
+    ) || {};
 
     return {
       success: true,
       data: {
         users: roleStats,
-        jobs: jobStats?.reduce(
-          (acc, j) => {
-            acc[j.status] = (acc[j.status] || 0) + 1;
-            return acc;
-          },
-          {}
-        ),
-        applications: appStats?.reduce(
-          (acc, a) => {
-            acc[a.status] = (acc[a.status] || 0) + 1;
-            return acc;
-          },
-          {}
-        ),
+        jobs: jobCounts,
+        applications: applicationCounts,
       },
     };
   } catch (error) {
+    console.error('Error fetching admin statistics:', error);
     return { success: false, error: error.message };
   }
 };

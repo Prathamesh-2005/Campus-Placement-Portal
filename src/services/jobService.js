@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase } from '../config/supabase';
 import { notifyApplicationStatusUpdate } from './emailService';
 
 // GET ALL JOB DRIVES (approved only for students)
@@ -119,6 +119,7 @@ export const getStudentApplications = async (studentId) => {
       .from('applications')
       .select(`
         id,
+        job_id,
         status,
         applied_at,
         job_drives(id, title, package, company_id, companies(company_name))
@@ -127,6 +128,7 @@ export const getStudentApplications = async (studentId) => {
       .order('applied_at', { ascending: false });
 
     if (error) throw error;
+    console.log('Fetched applications:', data);
     return { success: true, data };
   } catch (error) {
     return { success: false, error: error.message };

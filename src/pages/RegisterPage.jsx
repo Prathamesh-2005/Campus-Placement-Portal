@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signupUser, createStudentProfile, createCompanyProfile } from '../services/authService';
+import toast from 'react-hot-toast';
+import { Mail, Lock, User, Building2, Loader, ArrowRight, Briefcase } from 'lucide-react';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const [role, setRole] = useState('student'); // student, company, tnp
+  const [role, setRole] = useState('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   // Student fields
   const [studentName, setStudentName] = useState('');
@@ -24,65 +25,55 @@ const RegisterPage = () => {
   const [tnpName, setTnpName] = useState('');
   const [tnpVerificationCode, setTnpVerificationCode] = useState('');
 
-  // Branches dropdown options
   const branches = ['CSE', 'IT', 'ECE', 'Mechanical', 'Civil', 'Other'];
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError(null);
 
     // Validation
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
     if (role === 'student' && !studentName) {
-      setError('Name is required');
+      toast.error('Name is required');
       return;
     }
 
     if (role === 'company' && !companyName) {
-      setError('Company name is required');
+      toast.error('Company name is required');
       return;
     }
 
     if (role === 'tnp' && !tnpName) {
-      setError('Name is required');
-      return;
-    }
-
-    if (role === 'tnp' && !tnpVerificationCode) {
-      setError('Verification code is required');
+      toast.error('Name is required');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Step 1: Create user
       const signupResult = await signupUser(email, password, role);
       if (!signupResult.success) {
-        // Better error messages for specific errors
         let errorMsg = signupResult.error;
         if (errorMsg.includes('429') || errorMsg.includes('rate')) {
-          errorMsg = 'Too many signup attempts. Please wait a few minutes and try again with a different email if possible.';
+          errorMsg = 'Too many attempts. Please wait a few minutes.';
         } else if (errorMsg.includes('already registered') || errorMsg.includes('User already exists')) {
-          errorMsg = 'This email is already registered. Try logging in instead.';
+          errorMsg = 'This email is already registered.';
         }
-        setError(errorMsg);
+        toast.error(errorMsg);
         setLoading(false);
         return;
       }
 
       const userId = signupResult.user.id;
 
-      // Step 2: Create role-specific profile
       if (role === 'student') {
         const profileResult = await createStudentProfile(userId, {
           name: studentName,
@@ -93,7 +84,7 @@ const RegisterPage = () => {
         });
 
         if (!profileResult.success) {
-          setError(profileResult.error);
+          toast.error(profileResult.error);
           setLoading(false);
           return;
         }
@@ -105,289 +96,319 @@ const RegisterPage = () => {
         });
 
         if (!profileResult.success) {
-          setError(profileResult.error);
+          toast.error(profileResult.error);
           setLoading(false);
           return;
         }
       }
-      // TNP profile creation would go here if needed
 
-      // Success - redirect to login
-      navigate('/login', {
-        state: { message: 'Registration successful! Please login.' },
-      });
+      toast.success('✅ Account created successfully!');
+      navigate('/login');
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-blue-600 flex-col justify-center items-center p-12">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-lg mb-6">
-            <span className="text-3xl font-bold text-blue-600">CH</span>
-          </div>
-          <h1 className="text-4xl font-bold text-white mb-4">CampusHire</h1>
-          <p className="text-blue-100 text-lg mb-12">Smart Campus Placement Portal</p>
-          
-          <div className="bg-white/10 rounded-lg p-6 text-left">
-            <h3 className="text-white font-semibold mb-4">Join as:</h3>
-            <div className="space-y-3 text-blue-100 text-sm">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-white">👤</span>
-                </div>
-                <div>
-                  <p className="font-semibold text-white">Student</p>
-                  <p className="text-xs mt-1">Browse jobs, apply for positions, track applications</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-white">🏢</span>
-                </div>
-                <div>
-                  <p className="font-semibold text-white">Company</p>
-                  <p className="text-xs mt-1">Post jobs, manage applications, hire talent</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-white">👨‍💼</span>
-                </div>
-                <div>
-                  <p className="font-semibold text-white">Placement Officer</p>
-                  <p className="text-xs mt-1">Approve jobs, monitor placements, manage process</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-slate-50 flex items-center justify-center px-4 py-12">
+      {/* Animated background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Right side - Register Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
-          {/* Mobile header */}
-          <div className="lg:hidden text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
-            <p className="text-gray-600 mt-1">Join CampusHire</p>
+      {/* Main container */}
+      <div className="relative w-full max-w-5xl">
+        <div className="grid md:grid-cols-2 gap-8 items-start md:items-center">
+          {/* Left side - Branding */}
+          <div className="hidden md:block space-y-8">
+            <div>
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-linear-to-br from-blue-600 to-blue-700 rounded-2xl mb-6 shadow-lg">
+                <Briefcase className="w-7 h-7 text-white" />
+              </div>
+              <h1 className="text-6xl font-bold text-slate-900 tracking-tight mb-3">CampusHire</h1>
+              <p className="text-lg text-slate-600 font-semibold">Smart Campus Placement Portal</p>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                { icon: '🎓', text: 'Perfect fit for all roles' },
+                { icon: '⚙️', text: 'Easy account setup' },
+                { icon: '🔒', text: 'Secure & trusted' }
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-4 group">
+                  <span className="text-3xl">{item.icon}</span>
+                  <span className="text-slate-700 font-semibold group-hover:text-slate-900 transition-colors">{item.text}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Register Card */}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Get Started</h2>
-            <p className="text-gray-600 mb-6">Choose your role and create your account</p>
-
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
-                  <span>{error}</span>
+          {/* Right side - Register Form */}
+          <div className="w-full">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
+              {/* Header with gradient background */}
+              <div className="bg-linear-to-r from-slate-900 to-slate-800 px-8 py-8 overflow-hidden sticky top-0 z-10">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 rounded-full -mr-20 -mt-20"></div>
+                <div className="relative z-10">
+                  <div className="md:hidden mb-4">
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-500/20 rounded-xl mb-4">
+                      <Briefcase className="w-6 h-6 text-blue-300" />
+                    </div>
+                  </div>
+                  <h2 className="text-3xl font-bold text-white">Create Account</h2>
+                  <p className="text-slate-300 mt-2 font-medium">Choose your role and join CampusHire</p>
                 </div>
               </div>
-            )}
 
-            {/* Role Selection */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-900 mb-3">I am a:</label>
-              <div className="space-y-2">
-                {[
-                  { value: 'student', label: '👤 Student', desc: 'Find and apply for jobs' },
-                  { value: 'company', label: '🏢 Company', desc: 'Post jobs and hire' },
-                  { value: 'tnp', label: '👨‍💼 Placement Officer', desc: 'Manage placements' }
-                ].map((option) => (
-                  <label key={option.value} className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition" style={{ borderColor: role === option.value ? '#2563eb' : '#e5e7eb', backgroundColor: role === option.value ? '#eff6ff' : '#ffffff' }}>
-                    <input
-                      type="radio"
-                      name="role"
-                      value={option.value}
-                      checked={role === option.value}
-                      onChange={(e) => setRole(e.target.value)}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <div className="ml-3">
-                      <p className="font-semibold text-gray-900">{option.label}</p>
-                      <p className="text-xs text-gray-600">{option.desc}</p>
+              {/* Form content */}
+              <div className="px-8 py-8 space-y-6">
+                {/* Role Selection */}
+                <div className="space-y-3">
+                  <label className="block text-sm font-semibold text-slate-900">I am a:</label>
+                  {[
+                    { value: 'student', icon: User, label: 'Student', desc: 'Find and apply for jobs' },
+                    { value: 'company', icon: Building2, label: 'Company', desc: 'Post jobs and hire' },
+                    { value: 'tnp', icon: '👨‍💼', label: 'Placement Officer', desc: 'Manage placements' }
+                  ].map((option) => {
+                    const Icon = option.icon;
+                    const isSelected = role === option.value;
+                    return (
+                      <button
+                        key={option.value}
+                        onClick={() => setRole(option.value)}
+                        className={`w-full p-3 rounded-lg border-2 transition-all text-left flex items-center gap-3 ${
+                          isSelected
+                            ? 'border-blue-500 bg-blue-50 shadow-md'
+                            : 'border-slate-200 hover:border-slate-300 bg-white hover:shadow-sm'
+                        }`}
+                      >
+                        <div className={`p-2 rounded-lg shrink-0 ${isSelected ? 'bg-blue-100' : 'bg-slate-100'}`}>
+                          {typeof Icon === 'string' ? (
+                            <span className="text-xl">{Icon}</span>
+                          ) : (
+                            <Icon className={`w-5 h-5 ${isSelected ? 'text-blue-600' : 'text-slate-600'}`} />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-slate-900">{option.label}</p>
+                          <p className="text-xs text-slate-500">{option.desc}</p>
+                        </div>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-blue-500 bg-blue-500' : 'border-slate-300'}`}>
+                          {isSelected && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleRegister} className="space-y-4 pt-4 border-t border-slate-200">
+                  {/* Email */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-slate-900">Email Address</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3.5 h-5 w-5 text-blue-500" />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        className="w-full pl-11 pr-4 py-2.5 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 bg-linear-to-r from-white to-blue-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                        required
+                      />
                     </div>
-                  </label>
-                ))}
+                  </div>
+
+                  {/* Password */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-slate-900">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3.5 h-5 w-5 text-blue-500" />
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full pl-11 pr-4 py-2.5 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 bg-linear-to-r from-white to-blue-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-slate-900">Confirm Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3.5 h-5 w-5 text-blue-500" />
+                      <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full pl-11 pr-4 py-2.5 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 bg-linear-to-r from-white to-blue-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Student Fields */}
+                  {role === 'student' && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-900">Full Name</label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-3.5 h-5 w-5 text-blue-500" />
+                          <input
+                            type="text"
+                            value={studentName}
+                            onChange={(e) => setStudentName(e.target.value)}
+                            placeholder="John Doe"
+                            className="w-full pl-11 pr-4 py-2.5 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 bg-linear-to-r from-white to-blue-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-slate-900">Branch</label>
+                          <select
+                            value={branch}
+                            onChange={(e) => setBranch(e.target.value)}
+                            className="w-full px-3 py-2.5 border-2 border-slate-200 rounded-lg text-slate-900 bg-linear-to-r from-white to-blue-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm shadow-sm font-medium"
+                            required
+                          >
+                            <option value="">Select branch</option>
+                            {branches.map((b) => (
+                              <option key={b} value={b}>{b}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-slate-900">CGPA</label>
+                          <input
+                            type="number"
+                            value={cgpa}
+                            onChange={(e) => setCgpa(e.target.value)}
+                            placeholder="7.5"
+                            step="0.01"
+                            min="0"
+                            max="10"
+                            className="w-full px-3 py-2.5 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 bg-linear-to-r from-white to-blue-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Company Fields */}
+                  {role === 'company' && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-900">Company Name</label>
+                        <div className="relative">
+                          <Building2 className="absolute left-3 top-3.5 h-5 w-5 text-blue-500" />
+                          <input
+                            type="text"
+                            value={companyName}
+                            onChange={(e) => setCompanyName(e.target.value)}
+                            placeholder="Tech Corp Inc."
+                            className="w-full pl-11 pr-4 py-2.5 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 bg-linear-to-r from-white to-blue-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-900">Description</label>
+                        <textarea
+                          value={companyDescription}
+                          onChange={(e) => setCompanyDescription(e.target.value)}
+                          placeholder="Brief description..."
+                          rows="2"
+                          className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 bg-linear-to-r from-white to-blue-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none text-sm shadow-sm"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* TNP Fields */}
+                  {role === 'tnp' && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-900">Full Name</label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-3.5 h-5 w-5 text-blue-500" />
+                          <input
+                            type="text"
+                            value={tnpName}
+                            onChange={(e) => setTnpName(e.target.value)}
+                            placeholder="Dr. Smith"
+                            className="w-full pl-11 pr-4 py-2.5 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 bg-linear-to-r from-white to-blue-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-slate-900">Verification Code</label>
+                        <input
+                          type="text"
+                          value={tnpVerificationCode}
+                          onChange={(e) => setTnpVerificationCode(e.target.value)}
+                          placeholder="Institution code"
+                          className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 bg-linear-to-r from-white to-blue-50 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                          required
+                        />
+                        <p className="text-xs text-slate-500 mt-1 font-medium">Contact your administrator for the code</p>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-2.5 px-4 bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg mt-6"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader className="w-4 h-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        Create Account
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-3 bg-white text-slate-500 font-medium">Already have an account?</span>
+                  </div>
+                </div>
+
+                {/* Login Button */}
+                <button
+                  onClick={() => navigate('/login')}
+                  className="w-full py-2.5 px-4 border-2 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-400 font-semibold rounded-lg transition-all duration-200 shadow-sm"
+                >
+                  Sign In Instead
+                </button>
               </div>
             </div>
-
-            <form onSubmit={handleRegister} className="space-y-4">
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Email Address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  required
-                />
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  required
-                />
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Confirm Password</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  required
-                />
-              </div>
-
-              {/* Student Fields */}
-              {role === 'student' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Full Name</label>
-                    <input
-                      type="text"
-                      value={studentName}
-                      onChange={(e) => setStudentName(e.target.value)}
-                      placeholder="John Doe"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Branch</label>
-                    <select
-                      value={branch}
-                      onChange={(e) => setBranch(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                      required
-                    >
-                      <option value="">Select your branch</option>
-                      {branches.map((b) => (
-                        <option key={b} value={b}>{b}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">CGPA</label>
-                    <input
-                      type="number"
-                      value={cgpa}
-                      onChange={(e) => setCgpa(e.target.value)}
-                      placeholder="7.5"
-                      step="0.01"
-                      min="0"
-                      max="10"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Company Fields */}
-              {role === 'company' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Company Name</label>
-                    <input
-                      type="text"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder="Tech Corp Inc."
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Company Description</label>
-                    <textarea
-                      value={companyDescription}
-                      onChange={(e) => setCompanyDescription(e.target.value)}
-                      placeholder="Brief description of your company..."
-                      rows="3"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* TNP Fields */}
-              {role === 'tnp' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Full Name</label>
-                    <input
-                      type="text"
-                      value={tnpName}
-                      onChange={(e) => setTnpName(e.target.value)}
-                      placeholder="Dr. Smith"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">TNP Verification Code</label>
-                    <input
-                      type="text"
-                      value={tnpVerificationCode}
-                      onChange={(e) => setTnpVerificationCode(e.target.value)}
-                      placeholder="Enter institution verification code"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                      required
-                    />
-                    <p className="text-xs text-gray-600 mt-1">Contact your institution administrator for the verification code</p>
-                  </div>
-                </>
-              )}
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition"
-              >
-                {loading ? 'Creating account...' : 'Create Account'}
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="my-6 flex items-center gap-4">
-              <div className="flex-1 h-px bg-gray-300"></div>
-              <p className="text-gray-500 text-sm">Already have an account?</p>
-              <div className="flex-1 h-px bg-gray-300"></div>
-            </div>
-
-            {/* Login link */}
-            <button
-              onClick={() => navigate('/login')}
-              className="w-full py-2.5 px-4 border border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold rounded-lg transition"
-            >
-              Sign In
-            </button>
           </div>
         </div>
       </div>

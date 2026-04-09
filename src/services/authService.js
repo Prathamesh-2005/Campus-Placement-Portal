@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase } from '../config/supabase';
 
 // SIGNUP - Create user with role
 export const signupUser = async (email, password, role) => {
