@@ -7,6 +7,7 @@ import Navbar from './components/Navbar';
 // Pages
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import LandingPage from './pages/LandingPage';
 import StudentDashboard from './pages/StudentDashboard';
 import CompanyDashboard from './pages/CompanyDashboard';
 import AllApplicationsPage from './pages/AllApplicationsPage';
@@ -50,7 +51,7 @@ const HomePage = () => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <LandingPage />;
   }
 
   // Redirect based on role
