@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { 
   GraduationCap, BookOpen, Briefcase, 
   CalendarDays, Building2, CheckCircle2, 
-  Clock, XCircle, Award, ChevronRight, FileText, MapPin, Calendar, Upload, Download
+  Clock, XCircle, Award, ChevronRight, FileText, MapPin, Calendar, Upload, Download, Edit2, Save, X
 } from 'lucide-react';
 
 const StudentDashboard = () => {
@@ -23,6 +23,9 @@ const StudentDashboard = () => {
   const [selectedApplication, setSelectedApplication] = useState(null); // For viewing details
   const [resumeUploading, setResumeUploading] = useState(false);
   const [resumeFile, setResumeFile] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editData, setEditData] = useState({ name: '', cgpa: '', branch: '' });
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -198,6 +201,57 @@ const StudentDashboard = () => {
     );
   };
 
+  const startEditing = () => {
+    setEditData({
+      name: studentProfile?.name || '',
+      cgpa: studentProfile?.cgpa || '',
+      branch: ''
+    });
+    setEditMode(true);
+  };
+
+  const cancelEditing = () => {
+    setEditMode(false);
+    setEditData({ name: '', cgpa: '', branch: '' });
+  };
+
+  const saveChanges = async () => {
+    if (!editData.name || !editData.cgpa) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    try {
+      setUpdateLoading(true);
+      const toastId = toast.loading('Updating profile...');
+
+      const { error } = await supabase
+        .from('students')
+        .update({
+          name: editData.name,
+          cgpa: parseFloat(editData.cgpa)
+        })
+        .eq('id', studentProfile.id);
+
+      if (error) throw error;
+
+      setStudentProfile({
+        ...studentProfile,
+        name: editData.name,
+        cgpa: parseFloat(editData.cgpa)
+      });
+
+      toast.dismiss(toastId);
+      toast.success('✅ Profile updated successfully!');
+      setEditMode(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile: ' + (error.message || 'Unknown error'));
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -258,36 +312,102 @@ const StudentDashboard = () => {
       <main className="max-w-7xl mx-auto px-6 lg:px-16 py-16 space-y-12 font-body">
         
         {/* ── STATS SECTION ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl border border-slate-200 p-6 card-hover flex items-center gap-4">
-            <div className="h-12 w-12 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Award className="w-6 h-6 text-blue-600" />
-            </div>
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 card-hover">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <p className="tag text-slate-400 mb-1">Current CGPA</p>
-              <p className="text-3xl font-bold text-slate-900">{studentProfile?.cgpa || 'N/A'}</p>
+              <h2 className="font-display text-2xl text-slate-900">Profile Information</h2>
+              <p className="text-slate-600 text-sm mt-1">Your academic and placement details</p>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-xl border border-slate-200 p-6 card-hover flex items-center gap-4">
-            <div className="h-12 w-12 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
-              <BookOpen className="w-6 h-6 text-indigo-600" />
-            </div>
-            <div>
-              <p className="tag text-slate-400 mb-1">Branch</p>
-              <p className="text-2xl font-bold text-slate-900">{studentProfile?.branch || 'N/A'}</p>
-            </div>
+            {!editMode && (
+              <button
+                onClick={startEditing}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-lg hover:bg-slate-800 transition-all"
+              >
+                <Edit2 className="w-4 h-4" />
+                Edit Profile
+              </button>
+            )}
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-6 card-hover flex items-center gap-4">
-            <div className="h-12 w-12 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Briefcase className="w-6 h-6 text-emerald-600" />
+          {editMode ? (
+            <div className="space-y-5">
+              <div>
+                <label className="tag text-slate-500 mb-2 block">Name</label>
+                <input
+                  type="text"
+                  value={editData.name}
+                  onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                  placeholder="Your name"
+                />
+              </div>
+
+              <div>
+                <label className="tag text-slate-500 mb-2 block">CGPA</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="10"
+                  value={editData.cgpa}
+                  onChange={(e) => setEditData({ ...editData, cgpa: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg font-body focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                  placeholder="e.g. 8.5"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-slate-200">
+                <button
+                  onClick={cancelEditing}
+                  disabled={updateLoading}
+                  className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition-all disabled:opacity-50"
+                >
+                  <X className="w-4 h-4 inline mr-2" />
+                  Cancel
+                </button>
+                <button
+                  onClick={saveChanges}
+                  disabled={updateLoading}
+                  className="flex-1 px-4 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-lg hover:bg-slate-800 transition-all disabled:opacity-50 inline-flex items-center justify-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  {updateLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
-            <div>
-              <p className="tag text-slate-400 mb-1">Applications</p>
-              <p className="text-3xl font-bold text-slate-900">{applications.length}</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-xl border border-slate-200 p-6 card-hover flex items-center gap-4">
+                <div className="h-12 w-12 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Award className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="tag text-slate-400 mb-1">Current CGPA</p>
+                  <p className="text-3xl font-bold text-slate-900">{studentProfile?.cgpa || 'N/A'}</p>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl border border-slate-200 p-6 card-hover flex items-center gap-4">
+                <div className="h-12 w-12 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <BookOpen className="w-6 h-6 text-indigo-600" />
+                </div>
+                <div>
+                  <p className="tag text-slate-400 mb-1">Branch</p>
+                  <p className="text-2xl font-bold text-slate-900">{studentProfile?.branch || 'N/A'}</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-slate-200 p-6 card-hover flex items-center gap-4">
+                <div className="h-12 w-12 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Briefcase className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="tag text-slate-400 mb-1">Applications</p>
+                  <p className="text-3xl font-bold text-slate-900">{applications.length}</p>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* ── RESUME SECTION ── */}
