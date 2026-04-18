@@ -92,7 +92,37 @@ src/
 
 ---
 
-## 🗄️ Database Schema
+## � Screenshots
+
+### Landing Page
+
+![Landing Page](/screenshots/landing.png)
+_Modern landing page showcasing platform features and value proposition_
+
+### Student Dashboard
+
+![Student Dashboard](/screenshots/Student_Dashboard.png)
+_Browse available job drives and track applications_
+
+### Company Dashboard
+
+![Company Dashboard](/screenshots/Company_dashboard.png)
+_Manage job drives and review student applications_
+
+### TNP Officer Dashboard
+
+![TNP Dashboard](/screenshots/Tnp_dashboard.png)
+_Approve job drives and monitor placement statistics_
+
+### Authentication Pages
+
+![Login](/screenshots/login.png)
+_Modern login and registration interfaces_
+
+![Register](/screenshots/signup.png)
+_Modern Signup  and registration interfaces_
+
+---
 
 ```mermaid
 erDiagram
