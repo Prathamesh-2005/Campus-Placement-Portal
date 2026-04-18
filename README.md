@@ -106,12 +106,12 @@ _Browse available job drives and track applications_
 
 ### Company Dashboard
 
-![Company Dashboard](/screenshots/Company_dashboard.png)
+![Company Dashboard](/screenshots/Company_Dashboard.png)
 _Manage job drives and review student applications_
 
 ### TNP Officer Dashboard
 
-![TNP Dashboard](/screenshots/Tnp_dashboard.png)
+![TNP Dashboard](/screenshots/Tnp_Dashboard.png)
 _Approve job drives and monitor placement statistics_
 
 ### Authentication Pages
